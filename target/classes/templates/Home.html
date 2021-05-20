@@ -1,0 +1,40 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <title>Inicio</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div th:replace="include/TemplateHome :: RecursoCss"></div>
+
+        <header th:replace="include/TemplateHome :: header"></header>
+        <aside th:replace="include/TemplateHome :: aside"></aside>
+
+
+        <section id="main-content">
+            <section class="wrapper">
+                <div class="row mt">
+
+                    <div th:each="seccion: ${session.secciones}" class="col-lg-4 col-md-4 col-sm-4 mb">
+                        <div class="content-panel pn">
+                            <div id="blog-bg">
+                                <div class="blog-title" th:text="${seccion.nombreCurso}">Curso</div>
+                            </div>
+                            <div class="blog-text">
+                                <p th:text=" 'Profesor : ' + ${seccion.nomProfesor} ">Profesor</p>
+                                <p th:text=" 'Seccion : ' + ${seccion.nroSeccion} ">Seccion</p>
+                                <a th:href="@{'/curso/seccion/'+${seccion.nroSeccion}}" class="btn btn-primary btn-xs">Ir al Curso</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </section>
+
+
+
+        <div th:replace="include/TemplateHome :: RecursoJs"></div>
+    </body>
+</html>

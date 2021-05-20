@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <title>Listado de Cursos</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div th:each="semana : ${semanas}" class="panel panel-default">
+            <div class="panel-heading" role="tab" >
+                <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" th:href=" '#collapse'+${semana.nroSemana} " aria-expanded="true" 
+                       th:text="${semana.semana}">
+                   <!--  </a> <a href="#" title="Agregar documentos"><i class="fa fa-plus-circle"></i></a> -->
+                </h4>
+            </div>
+            <div th:id="'collapse'+${semana.nroSemana} " class="panel-collapse collapse in" role="tabpanel" >
+                <div class="panel-body">
+                    <ul class="list-group">
+                        <div th:each="contenido : ${semana.archivos}">
+                            <li class="list-group-item">
+                                <a th:href="@{/archivos/}+${contenido.archivo}" title="Abrir archivo" target="_blank" th:text="${contenido.archivo}"></a>
+                            </li>
+                        </div>
+                    </ul>
+
+
+                    <div th:each="foro : ${semana.foros}">
+                        <a th:href="@{/foro/}+${seccion}+'/'+${foro.id_foro}" title="Foro" th:text="'Foro : '+${foro.titulo} " class="btn btn-primary btn-xs"></a>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </body>
+</html>

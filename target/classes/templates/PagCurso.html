@@ -1,0 +1,192 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <title>Cursos</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div th:replace="include/TemplateHome :: RecursoCss"></div>
+        <header th:replace="include/TemplateHome :: header"></header>
+        <aside th:replace="include/TemplateHome :: aside"></aside>
+
+
+        <section id="main-content">
+            <section class="wrapper">
+                <div class="row mt">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+
+                        <div class="showback">
+                            <div class="chat-room-head">
+                                <h4 th:text="'Curso : '+${nomCurso} ">Curso : </h4>
+                                <h4 th:text="'Seccion : '+${seccion} ">Seccion : </h4>
+                            </div>
+                            <div class="room-desk"  sec:authorize='hasAnyAuthority("Docente")'  >
+                                <a href="#" class="pull-right btn btn-primary" data-toggle="modal" data-target="#nuevoArchivo"><i class="fa fa-plus"></i> Subir Archivos</a>
+                                <a href="#" class="pull-right btn btn-theme02" data-toggle="modal" data-target="#nuevoForo"><i class="fa fa-plus"></i> Nuevo Foro</a>
+                            </div>
+                            <br>
+                            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="false">
+
+                                <div id="resultado"></div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+            </section>
+
+        </section>
+        <div class="modal fade" id="nuevoArchivo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Subir Archivos</h4>
+                    </div>
+                    <form method="post" id="frmSubirArchivos" enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="nro_semana">Semana</label>
+                                <select class="form-control" id="nro_semana" name="nro_semana">
+                                    <option  th:each="semana : ${semanas}" 
+                                             th:value="${semana.nroSemana}" th:text="${semana.semana}"></option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="archivo">Archivo</label>
+                                <input type="file" class="form-control" name="archivos" id="archivos">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="nro_seccion" id="nro_seccion" th:value="${seccion}">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                            <button type="button" class="btn btn-primary" onclick="SubirArchivos()">Enviar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="nuevoForo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Nuevo Foro</h4>
+                    </div>
+                    <form method="post" id="frmGuardar">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="titulo">Titulo</label>
+                                <input type="text" class="form-control" name="titulo" id="titulo" placeholder="Titulo del foro" >
+                            </div>
+                            <div class="form-group">
+                                <label for="idSemana">Semana</label>
+                                <select class="form-control" id="nro_semana" name="nro_semana">
+                                    <option  th:each="semana : ${semanas}" 
+                                             th:value="${semana.nroSemana}" th:text="${semana.semana}"></option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaInicio">Fecha Inicio</label>
+                                <input type="date" class="form-control" name="fechaInicio" id="fechaInicio">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fechaCierre">Fecha Cierre</label>
+                                <input type="date" class="form-control" name="fechaCierre" id="fechaCierre">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="descripcion">Descripcion</label>
+                                <textarea class="form-control" rows="4" id="descripcion" name="descripcion"></textarea>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="nro_seccion" id="nro_seccion" th:value="${seccion}">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                            <button type="button" class="btn btn-primary" onclick="GuardarForo()">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div th:replace="include/TemplateHome :: RecursoJs"></div>
+    </body>
+
+    <script type="text/javascript">
+        $(function () {
+            Listar();
+        });
+
+        function SubirArchivos() {
+            var form = new FormData(document.getElementById("frmSubirArchivos"));
+
+            $.ajax({
+                type: 'post',
+                url: "/contenido/guardar",
+                data: form,
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function (data) {
+                    if (parseInt(data)>0) {
+                        alert("Guardado correctamente..!!");
+                        Listar();
+                    } else {
+                        alert(data);
+                    }
+
+                }, error: function (jqXHR, textStatus, errorThrown) {
+                    alert("No se ha podido guardar datos...!!");
+                }
+            });
+        }
+
+        function Listar() {
+            var idSeccion = "[[${seccion}]]";
+            $.ajax({
+                type: 'get',
+                url: "/curso/listar/seccion/" + idSeccion,
+                beforeSend: function (xhr) {
+                    $("#resultado").html("Cargando..");
+                },
+                success: function (data, status, xhr) {
+                    $("#resultado").html(data);
+                },
+                error: function (xhr, status, errMsg) {
+                    alert("Error :( " + xhr.responseText);
+                }
+            });
+        }
+
+        function GuardarForo() {
+            var form = $("#frmGuardar").serialize();
+
+            $.ajax({
+                type: 'POST',
+                url: "/foro/guardar",
+                data: form,
+                success: function (data, status, xhr) {
+                    if (parseInt(data) > 0) {
+                        alert("Foro creado correctamente");
+                        Listar();
+                        $("#nuevoForo").modal("hide");
+                        $("#frmGuardar")[0].reset();
+                    } else {
+                        alert("No se ha podido registrar foro");
+                    }
+                },
+                error: function (xhr, status, errMsg) {
+                    alert("Error :( " + xhr.responseText);
+                }
+            });
+
+        }
+    </script>
+</html>

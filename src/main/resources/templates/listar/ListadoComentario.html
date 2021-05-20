@@ -1,0 +1,14 @@
+<html>
+    <head>
+        <title>Listado de Comentarios</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div class="showback" th:each="dato : ${comentarios}">
+            <p><i class="fa fa-angle-right"></i> <span class="badge bg-info" th:text="${dato.nomUsuario}"></span></p>
+            <h4 th:text="${dato.desc_comentario}"></h4>
+        </div>
+    </div>
+</body>
+</html>

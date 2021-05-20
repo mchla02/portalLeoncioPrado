@@ -1,0 +1,37 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <title>Inicio</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div th:replace="include/TemplateIndex :: RecursoCss"></div>
+        <div id="login-page">
+            <div class="container">
+                <form class="form-login" th:action="@{/login}" method="post">
+                    <h2 class="form-login-heading">Inicio Sesion</h2>
+                    <div role='alert' th:if="${param.error}" class="alert alert-danger" >
+                        Usuario y/o Clave incorrecto
+                    </div>
+                    <div role='alert' th:if="${param.logout}" class="alert alert-success" >
+                        Sesion cerrada correctamente
+                    </div>
+                    <div class="login-wrap">
+                        <input type="text" name="username" id="username" class="form-control" placeholder="Usuario" autofocus>
+                        <br>
+                        <input type="password" name="password" id="password" class="form-control" placeholder="Contraseña">
+                        <br>
+                        <button class="btn btn-primary btn-block" href="index.html" type="submit"><i class="fa fa-lock"></i> Iniciar Sesion</button>
+
+                        <hr>
+                        <label class="text-justify">Para ingresar a la plataforma educativa debes hacer click en el siguiente botón e ingresar con sus datos con el usuario registrado.
+                        </label>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <div th:replace="include/TemplateIndex :: RecursoJs"></div>
+    </body>
+</html>

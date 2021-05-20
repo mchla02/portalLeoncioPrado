@@ -1,0 +1,204 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <title>Foro</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div th:replace="include/TemplateHome :: RecursoCss"></div>
+        <header th:replace="include/TemplateHome :: header"></header>
+        <aside th:replace="include/TemplateHome :: aside"></aside>
+
+
+        <section id="main-content">
+            <section class="wrapper">
+                <div class="row mt">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+
+                        <div class="showback">
+                            <div class="chat-room-head">
+                                <h3 th:text="'Foro : '+${foro.titulo}">Foro : </h3><br><br>
+                                <p><i class="fa fa-calendar"></i><span th:text="' Fecha Inicio : '+${foro.fechaInicio} "></span></p>
+                                <p><i class="fa fa-calendar"></i><span th:text="' Fecha Cierre : '+${foro.fechaCierre} "></span></p>
+                            </div>
+                            <div class="room-desk"  sec:authorize='hasAnyAuthority("Docente")' >
+                                <a href="javascript:void(0)"  th:attr="onclick='EliminarForo( ' + ${foro.id_foro} + ')'"  class="pull-right btn btn-danger"><i class="fa fa-trash"></i> Eliminar Foro</a>
+                                <a data-toggle="modal" data-target="#actualizarForo"  class="pull-right btn btn-primary"><i class="fa fa-edit"></i> Editar Foro</a>
+                            </div>
+                            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="false">
+                                <div class="activity-panel">
+                                    <h4>Descripcion</h4>
+                                    <hr>
+                                    <p th:text="${foro.descripcion}"></p>
+                                </div>
+  
+                                <div th:switch="${activar}">
+                                    <div class="showback" th:case="${true}">
+                                        <h4><i class="fa fa-angle-right"></i> Realizar comentario</h4>
+                                        <form id="frmRegistrarComentario" method="post">
+                                            <textarea id="desc_comentario" name="desc_comentario" class="form-control" rows="5" placeholder="Comentario..."></textarea>
+                                            <br>
+                                            <input type="hidden" id="id_foro" name="id_foro" th:value="${foro.id_foro}">
+                                            <button type="button" class="btn btn-primary" onclick="GuardarComentario()">Guardar</button>
+                                        </form>
+
+                                    </div>
+                                </div>
+
+
+
+
+                                <div id="resultado"></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </section>
+
+        </section>
+
+        <div class="modal fade" id="actualizarForo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Actualizar Foro</h4>
+                    </div>
+                    <form method="post" id="frmActualizarForo">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="titulo">Titulo</label>
+                                <input type="text" class="form-control" name="titulo" id="titulo" placeholder="Titulo del foro" th:value="${foro.titulo}">
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaInicio">Fecha Inicio</label>
+                                <input type="date" class="form-control" name="fechaInicio" id="fechaInicio" th:value="${foro.fechaInicio}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fechaCierre">Fecha Cierre</label>
+                                <input type="date" class="form-control" name="fechaCierre" id="fechaCierre" th:value="${foro.fechaCierre}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="descripcion">Descripcion</label>
+                                <textarea class="form-control" rows="6" id="descripcion" name="descripcion" th:text="${foro.descripcion}"></textarea>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="id_foro" id="id_foro" th:value="${foro.id_foro}">
+                            <input type="hidden" name="nro_seccion" id="nro_seccion" th:value="${seccion}">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                            <button type="button" class="btn btn-primary" onclick="ActualizarForo()">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div th:replace="include/TemplateHome :: RecursoJs"></div>
+    </body>
+
+    <script type="text/javascript">
+        $(function () {
+            ListarComentario();
+        });
+
+        function ListarComentario() {
+            var idForo = "[[${foro.id_foro}]]";
+
+            $.ajax({
+                type: 'get',
+                url: "/comentario/listar",
+                data: {
+                    idForo: idForo
+                },
+                beforeSend: function (xhr) {
+                    $("#resultado").html("Cargando..");
+                },
+                success: function (data, status, xhr) {
+                    $("#resultado").html(data);
+                },
+                error: function (xhr, status, errMsg) {
+                    alert("Error :( " + xhr.responseText);
+                }
+            });
+        }
+
+        function GuardarComentario() {
+            var coment = $("#desc_comentario").val();
+            if (coment.trim() === "") {
+                alert("El campo del comentario es obligatorio");
+                return;
+            }
+
+            $.ajax({
+                type: 'post',
+                url: "/comentario/guardar",
+                data: $("#frmRegistrarComentario").serialize(),
+                success: function (data, status, xhr) {
+                    if (parseInt(data) > 0) {
+                        $("#desc_comentario").val("");
+                        ListarComentario();
+                        alert("Comentario creado correctamente");
+                    } else {
+                        alert("No se ha podido guardar comentario");
+                    }
+                },
+                error: function (xhr, status, errMsg) {
+                    alert("Error :( " + xhr.responseText);
+                }
+            });
+        }
+
+
+        function ActualizarForo() {
+            var form = $("#frmActualizarForo").serialize();
+            var idSeccion = "[[${seccion}]]";
+            var idForo = "[[${foro.id_foro}]]";
+            $.ajax({
+                type: 'put',
+                url: "/foro/actualizar",
+                data: form,
+                success: function (data, status, xhr) {
+                    if (parseInt(data) > 0) {
+                        alert("Foro actualizado correctamente");
+                        $(location).attr("href", "/foro/" + idSeccion + "/" + idForo);
+                    } else {
+                        alert("No se ha podido actualizar foro");
+                    }
+                },
+                error: function (xhr, status, errMsg) {
+                    alert("Error :( " + xhr.responseText);
+                }
+            });
+        }
+
+        function EliminarForo(id) {
+            var idSeccion = "[[${seccion}]]";
+
+            if (confirm("¿Esta seguro que desea eliminar foro?")) {
+                $.ajax({
+                    type: 'delete',
+                    url: "/foro/eliminar/" + id,
+                    success: function (data, status, xhr) {
+                        if (parseInt(data) > 0) {
+                            alert("Foro eliminado correctamente!!");
+                            $(location).attr("href", "/curso/seccion/" + idSeccion);
+                        } else {
+                            alert("No se puede eliminar foro");
+                        }
+                    },
+                    error: function (xhr, status, errMsg) {
+                        alert("Error :( " + xhr.responseText);
+                    }
+                });
+            }
+
+        }
+    </script>
+</html>
